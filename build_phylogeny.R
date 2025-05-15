@@ -114,6 +114,20 @@ if(!require("treemut", character.only=T,quietly = T, warn.conflicts = F)){
 # Functions
 #----------------------------------
 
+SPECIES="Hglaber" ##"Mmusculus" # Hsapiens  Mmusculus
+SPECIES_BUILD="Naked_mole-rat_paternal" #"mm10" # hg19 hg38 mm10
+PATIENTS=c("ND0019h")
+CV=c("missense","nonsense","ess_splice","frameshift","inframe","loh","start_lost","cna","stop_lost")
+GENES=readLines("GENES.txt")
+
+get_driver_scheme2=function(){
+  driver.scheme=read.table("driver_scheme_simple.txt",head=T,stringsAsFactors = FALSE,sep="\t")
+  n=max(driver.scheme$number)
+  pallete=c(RColorBrewer::brewer.pal(9,"Set1")[-6],RColorBrewer::brewer.pal(8,"Dark2"))
+  driver.scheme$colour=pallete[driver.scheme$number]
+  driver.scheme
+}
+
 get_ref_genome_name=function(){
   if(grepl("Hglaber",SPECIES)){
     ref_genome= sprintf("BSgenome.%s.NCBI.%s",SPECIES,"Nakedmoleratpaternal")
