@@ -114,7 +114,33 @@ if(!require("treemut", character.only=T,quietly = T, warn.conflicts = F)){
 # Functions
 #----------------------------------
 
-plot_spectrum = function(bed,save,add_to_title="",genomeFile = "/nfs/cancer_ref01/Homo_sapiens/37/genome.fa"){
+get_ref_genome_name=function(){
+  if(grepl("Hglaber",SPECIES)){
+    ref_genome= sprintf("BSgenome.%s.NCBI.%s",SPECIES,"Nakedmoleratpaternal")
+  }else{
+    ref_genome= sprintf("BSgenome.%s.UCSC.%s",SPECIES,SPECIES_BUILD)
+  }
+}
+
+chk_ref_genome_name=get_ref_genome_name()
+if(!exists("ref_genome") || ref_genome != chk_ref_genome_name){
+    ref_genome= get_ref_genome_name()
+    library(ref_genome, character.only = TRUE)
+    if(grepl("Hglaber",SPECIES)){
+      gene_rds="/lustre/scratch126/casm/team273jn/resources/heterocephalus_glaber_male_core_112_1_GENES.RDS"
+      if(file.exists(gene_rds)){
+        genes_txdb <- readRDS(gene_rds)
+      }else{
+        genes_txdb <- GenomicFeatures::genes(GenomicFeatures::makeTxDbFromEnsembl(organism="Heterocephalus glaber male",release=112))
+      }
+      seqlevelsStyle(genes_txdb) = "UCSC"
+    } else{
+      require(sprintf("TxDb.%s.UCSC.%s.knownGene",SPECIES,SPECIES_BUILD),character.only = TRUE)
+      genes_txdb <- genes(get(sprintf("TxDb.%s.UCSC.%s.knownGene",SPECIES,SPECIES_BUILD)))
+    }
+}
+
+plot_spectrum = function(bed,save,add_to_title="",genomeFile = "/lustre/scratch127/casm/team273jn/rj5/analysis/ND0018h_polyN/data/genome.Naked_mole-rat_paternal.fa.fai"){
   mutations=as.data.frame(bed)
   colnames(mutations) = c("chr","pos","ref","mut")
   mutations$pos=as.numeric(mutations$pos)
